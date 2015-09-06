@@ -63,7 +63,7 @@ def deriveSupplementaryKey(key, p):
 	assert(type(key) == type(1L))
 	assert(type(p) == type(1))
 	assert(key < (2 ** 2048))
-	assert(p1 < (2 ** 64))
+	assert(p < (2 ** 64))
 	"""
 	deriveSupplementaryKeyA, takes a 2048 bit key and applies the modulo operation to yield the modulo of `p1`. 
 	INPUT:

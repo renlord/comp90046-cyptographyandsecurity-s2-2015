@@ -328,16 +328,15 @@ class WorkerServer:
         # RECEIVE ALL IN TEXT
         self.recv_all_lines()
         self.send(self.serverProtocol.comm_end())
-
         while True:
             msg = self.receive()
             try:
                 if msg["type"] == "CLIENT_COMM_END":
                     break
-                except KeyError:
-                    print("Message does not containt `type` field")
-                    os._exit(1)
-        
+            except KeyError:
+                print("Message does not containt `type` field")
+                os._exit(1)
+
         return True
 
     def exit(self):

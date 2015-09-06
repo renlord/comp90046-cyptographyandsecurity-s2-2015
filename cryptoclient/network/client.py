@@ -24,7 +24,7 @@ CLIENT_CORPUS_PATH = "cryptoclient/corpus.txt"
 DEST_HOST = ''
 DEST_PORT = 8001
 
-NETWORK_DEBUG = False
+NETWORK_DEBUG = True
 PROTOCOL_DEBUG = False
 
 STDOUT_COMM = True
@@ -127,7 +127,6 @@ class ClientServer:
     def send_all_lines(self):
         for item in self.picklines():
             self.send_line(item[0], item[1])
-        self.send(self.clientProtocol.text_done())
         return True
 
     def recv_line(self):
@@ -254,12 +253,15 @@ class ClientServer:
         self.streamCipher.reset()
         # SEND ALL OUT TEXT
         self.send_all_lines()
+        self.send(self.clientProtocol.text_done())
+
         while True:
             msg = self.receive()
-            if msg["type"] == "SERVER_COMM_END":
-                return True
-            else:
-                print("OUT OF SYNC ERROR: Client is out of sync with server! Terminating...")
+            try:
+                if msg["type"] == "SERVER_COMM_END":
+                    break
+            except KeyError:
+                print("Message does not contain `type` field key")
                 sys.exit()
 
         self.send(self.clientProtocol.comm_end())
