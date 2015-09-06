@@ -29,6 +29,8 @@ class DESCiphers:
     def cipher_function(self, r, k):
     	assert(type(r) == type(1) or type(r) == type(1L))
         assert(type(k) == type(1) or type(k) == type(1L))
+        assert(r < (2 ** 32))
+        assert(k < (2 ** 48))
         """
             The DES Cipher Function
             
@@ -47,7 +49,7 @@ class DESCiphers:
         """
         Key Schedule Generation. 
         INPUT:
-            key, INTEGER or LONG 64 Bits
+            None
         OUTPUT:
             [key], LIST of Integer or LONG 48 Bits
         """
@@ -58,6 +60,7 @@ class DESCiphers:
     def crypt(self, input_block, encrypt_mode):
     	assert(type(input_block) == type(1) or type(input_block) == type(1L))
         assert(type(self.key) == type(1) or type(self.key) == type(1L))
+        assert(input_block < (2 ** 64))
         assert(type(encrypt_mode) == type(True))
         """
         DES Encrypt 

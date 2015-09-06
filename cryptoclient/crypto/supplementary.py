@@ -43,6 +43,7 @@ def get_bits(val, start_pos, end_pos, val_max_bits, new_max_bits):
 # TODO
 def parityWordChecksum(key):
 	assert(type(key) == type(1L))
+	assert(key < (2 ** 2048))
 	"""
 	parityWordChecksum, takes a 2048 bit key and applies a word by word XOR to yield a 64 bit result at the end. 
 	INPUT:
@@ -61,6 +62,8 @@ def parityWordChecksum(key):
 def deriveSupplementaryKey(key, p):
 	assert(type(key) == type(1L))
 	assert(type(p) == type(1))
+	assert(key < (2 ** 2048))
+	assert(p1 < (2 ** 64))
 	"""
 	deriveSupplementaryKeyA, takes a 2048 bit key and applies the modulo operation to yield the modulo of `p1`. 
 	INPUT:

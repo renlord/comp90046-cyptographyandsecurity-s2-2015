@@ -1,8 +1,7 @@
-from cryptoclient.network.client import main
-import sys
+import os
 
 if __name__ == "__main__":
-    try:
+	try:
         if len(sys.argv) > 2:
             main(sys.argv[1], sys.argv[2], sys.argv[3])
         else:

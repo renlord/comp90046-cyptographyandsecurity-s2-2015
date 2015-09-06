@@ -262,6 +262,8 @@ class ClientServer:
                 print("OUT OF SYNC ERROR: Client is out of sync with server! Terminating...")
                 sys.exit()
 
+        self.send(self.clientProtocol.comm_end())
+
     def exit(self):
         while True:
             msg = self.receive()
@@ -275,23 +277,33 @@ class ClientServer:
         self.sock.close()
         return True 
 
-def main(student_id): 
+def main(student_id, host=DEST_HOST, port=DEST_PORT): 
     socket = s.socket()
-    socket.connect((DEST_HOST, DEST_PORT))
+    socket.connect((host, port))
+    print("Connecting to HOST: {0} | Port: {1}".format(host, port))
+    print(" ")
     print("Connected to Server...")
+    print(" ")
     c = ClientServer(socket, student_id)
     print("==================== 1) Contact Phase Now ====================")
     c.contact_phase()
+    print("==================== 1) Contact Phase END ====================")
     print("==================== 2) Exchange Phase Now ===================")
     c.exchange_phase()
+    print("==================== 2) Exchange Phase END ===================")
     print("==================== 3) Specification Phase Now ==============")
     c.specification_phase()
+    print("==================== 3) Specification Phase END ==============")
     print("==================== 4) Communication Phase Now ==============")
     c.communication_phase()
+    print("==================== 4) Communication Phase END ==============")
     c.exit()
 
 if __name__ == "__main__":
     try:
-        main(sys.argv[1])
+        if len(sys.argv) > 2:
+            main(sys.argv[1], sys.argv[2], sys.argv[3])
+        else:
+            main(sys.argv[1])
     except IndexError:
         print("python client.py [STUDENT_ID] [HOST?] [PORT_NO?]")

@@ -329,6 +329,17 @@ class WorkerServer:
         self.recv_all_lines()
         self.send(self.serverProtocol.comm_end())
 
+        while True:
+            msg = self.receive()
+            try:
+                if msg["type"] == "CLIENT_COMM_END":
+                    break
+                except KeyError:
+                    print("Message does not containt `type` field")
+                    os._exit(1)
+        
+        return True
+
     def exit(self):
         self.send(self.serverProtocol.finish())
         print("Student {0} completed attempt. Process {1} ending...".format(self.student_id, os.getpid()))
