@@ -1,8 +1,8 @@
 import unittest
 import random
 
-import cryptoclient.crypto.des
-import reference.crypto.des
+import reference.crypto.des as candidate
+import reference.crypto.des as reference
 
 from timeout import timeout
 
@@ -10,8 +10,8 @@ class TestDESMethods(unittest.TestCase):
 
 	def setUp(self):
 		random_dh_key = random.getrandbits(2048)
-		self.candidate = cryptoclient.crypto.des.DESCipher(random_dh_key)
-		self.reference = reference.crypto.des.DESCipher(random_dh_key)
+		self.candidate = candidate.DESCipher(random_dh_key)
+		self.reference = reference.DESCipher(random_dh_key)
 
 	@timeout(5)
 	def test_cipher_function(self):

@@ -1,8 +1,11 @@
+# -*- coding: utf-8 -*-
+
 import unittest
 import random
 
-import cryptoclient.crypto.stream
-import reference.crypto.stream
+import reference.crypto.stream as candidate
+# import cryptoclient.crypto.stream as candidate
+import reference.crypto.stream as reference
 
 import reference.crypto.dhex as dhex
 
@@ -21,8 +24,8 @@ class TestStreamMethods(unittest.TestCase):
 		self.dh_p = prime
 		self.p1 = 5
 		self.p2 = 7
-		self.candidate = cryptoclient.crypto.stream.StreamCipher(self.dh_key, self.dh_p, self.p1, self.p2)
-		self.reference = reference.crypto.stream.StreamCipher(self.dh_key, self.dh_p, self.p1, self.p2)
+		self.candidate = candidate.StreamCipher(self.dh_key, self.dh_p, self.p1, self.p2)
+		self.reference = reference.StreamCipher(self.dh_key, self.dh_p, self.p1, self.p2)
 
 	@timeout(1)
 	def test_updateShiftRegister_once(self):
@@ -55,12 +58,12 @@ class TestStreamMethods(unittest.TestCase):
 	def test_crypt_basic(self):
 		err = "FAILED: _crypt does not work. Product of function does not match product of reference implementation"
 		text = "cryptography is cool"
-		self.assertEqual(self.candidate._crypt(text), self.reference._crypt(text))
+		self.assertEqual(self.candidate._crypt(text), self.reference._crypt(text), err)
 
 	@timeout(5)
 	def test_crypt_complex(self):
 		err = "FAILED: _crypt does not work. Product of function does not match product of reference implementation"
-		text = "future cryptography should support this ---->>>>> 😭😘👶🖖" 
-		self.assertEqual(self.candidate._crypt(text), self.reference._crypt(text))
+		text = "future cryptography should support this ---->>>>> 😭😘👶🖖"
+		self.assertEqual(self.candidate._crypt(text), self.reference._crypt(text), err)
 
 

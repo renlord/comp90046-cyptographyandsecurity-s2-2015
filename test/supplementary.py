@@ -1,7 +1,7 @@
 import unittest
 import random
 
-import cryptoclient.crypto.supplementary as candidate
+import reference.crypto.supplementary as candidate
 import reference.crypto.supplementary as reference
 
 import reference.crypto.dhex as dhex
@@ -28,4 +28,4 @@ class TestSupplementaryMethods(unittest.TestCase):
 	@timeout(2)
 	def test_deriveSupplementaryKey(self):
 		err = "FAILED: deriveSupplementaryKey. Non matching supplementary key"
-		self.assertEqual(candidate.deriveSupplementaryKey(self.dh_key, self.dh_p), reference.deriveSupplementaryKey(self.dh_key, self.dh_p), err)
+		self.assertEqual(candidate.deriveSupplementaryKey(self.dh_key, 31), reference.deriveSupplementaryKey(self.dh_key, 31), err)
