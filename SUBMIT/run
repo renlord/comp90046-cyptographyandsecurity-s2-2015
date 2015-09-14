@@ -1,0 +1,217 @@
+#!/bin/bash
+# 
+# COMP90043 Semester 2, 2015
+# Project Part A2 Submission Script
+# Renlord Y.
+#
+
+#PATH=/usr/java1.6/bin:$PATH; export PATH
+
+cwd=`pwd`
+name=`basename $cwd`
+visible=./vis/$name.OUT
+invisible=./invis/$name.OUT
+javaPath=/storage1/delta/students/r/rnyang/90043_SUBMIT/javaSolution
+pythonPath=/storage1/delta/students/r/rnyang/90043_SUBMIT/pythonSolution
+
+#
+# CREATE DIRECTORIES
+#
+if [ ! -d vis ] ; then 
+    mkdir vis
+else
+    rm -f vis/*
+fi
+#
+if [ ! -d invis ] ; then
+    mkdir invis
+else
+    rm -f invis/*
+fi
+
+# Remove Existing Compiled Classes
+rm -f *.pyc
+
+echo "=== COMP90043 Project Part A2 Feedback ===" > $visible
+echo " " >> $visible
+
+end () {
+    echo " " >> $visible
+    echo "=== COMP90043 Project Part A2 Feedback END ===" >> $visible
+    exit 0;
+}
+
+# PYTHON HANDLER
+python_inspect () {
+    echo "Matching files to Python manifest..." >> $visible
+        
+}
+
+python_copy () {
+    echo "Copying Python Files to current working directory..." >> $visible
+    cp -r $pythonPath/* $cwd/
+}
+
+python_clean () {
+    echo "Removing Python Files from current working directory..." >> $visible
+    mv ./part1_crypto.py ./invis/ 
+    rm -f ./*.py 
+    rm -f ./*.pyc
+    mv invis/part1_crypto.py ./
+}
+
+# JAVA HANDLER
+java_copy () {
+    echo "Copying Java Files to current working directory..." >> $visible
+    cp -rf $javaPath/src $cwd/
+    cp -f $javaPath/Makefile $cwd/
+    cp -rf $javaPath/lib $cwd/
+    rm -rf $cwd/bin
+    if [ -f CustomCrypto.java ]; then
+        mv ./CustomCrypto.java $cwd/src/crypto/client/ 
+    fi 
+}
+
+java_clean () {
+    echo "Removing Java Files from current working directory..." >> $visible
+    mv $cwd/src/crypto/client/CustomCrypto.java $cwd/.
+    make clean 
+    rm -rf ./src
+    rm -rf ./lib
+    rm -f ./Makefile
+}
+
+java_failure_handler () {
+    java_clean
+    end
+}
+
+
+JAVA_TOGGLE=false
+PYTHON_TOGGLE=false
+
+SINGLE_TOGGLE=false
+
+echo "================ START RUN SCRIPT ================" >> $visible
+
+# Check Submission Validity
+if [ -f *.zip ]; then
+    NUM_FILES=`find -type f | wc -l`
+    if [ "$numfiles" -gt "1" ]; then
+        echo "You have submitted more than 1 file. For zipped submissions, only 1 .zip archive file is accepted! Please read the project specification again and retry submission." >> $visible
+        end
+    else 
+        unzip *.zip
+        rm -f ./*.zip
+    fi
+fi
+
+NUM_PYTHON=`find -type f -name "*.py" | wc -l` 
+NUM_JAVA=`find -type f -name "*.java" | wc -l`
+
+if [ "$NUM_PYTHON" -gt "0" ] && [ "$NUM_JAVA" -gt "0" ]; then 
+    echo "Only submit Java or Python versions please. Retry Submission AGAIN!" >> $visible
+    end 
+fi 
+
+if [ "$NUM_PYTHON" -eq "0" ] && [ "$NUM_JAVA" -eq "0" ]; then
+    echo "You have submitted wrong File extensions.... Retry Submission AGAIN!" >> $visible
+    end
+fi
+
+if [ "$NUM_PYTHON" -gt "$NUM_JAVA" ]; then 
+    PYTHON_TOGGLE=true
+    echo "$NUM_PYTHON number of Python scripts found!!" >> $visible
+else
+    JAVA_TOGGLE=true
+    echo "$NUM_JAVA number of Java scripts found!!" >> $visible
+fi
+
+# Check if Java Single File selected 
+if [ "$JAVA_TOGGLE" = true ]; then
+    java_copy
+fi
+
+# Compile with Client Bundle
+if [ "$JAVA_TOGGLE" = true ]; then
+    echo "Compiling Java Submitted Class(es) with Client Bundle...." >> $visible
+    echo " " >> $visible
+    if [ ! -f Makefile ]; then
+        echo "WILL FAIL: No Makefile present..." >> $visible
+    fi
+    if [ ! -d src ]; then
+        echo "WILL FAIL: No Java Source directory..." >> $visible
+    fi 
+    if [ ! -d lib ]; then
+        echo "WILL FAIL: No Java 3rd Party Libraries..." >> $visible
+    fi
+    if [ -d bin ]; then
+        echo "bin Directory DETECTED.. Removing dirty bin directory..." >> $visible
+        rm -rf ./bin/
+    fi 
+    make -f ./Makefile >> $visible 2>&1
+    if [ $? -ne 0 ]; then
+        echo "FAILURE: Java compilation problems. Check logs!" >> $visible
+        java_failure_handler
+    fi
+fi  
+
+# Run Unit Test
+if [ "$JAVA_TOGGLE" = true ]; then
+    echo "Running Java Unit Tests...." >> $visible
+    echo " " >> $visible
+    make -f ./Makefile junit >> $visible 2>&1
+    if [ $? -ne 0 ]; then
+        echo "FAILURE: Test didn't pass..." >> $visible
+        java_failure_handler
+    fi
+    grep -q "false" $visible
+    if [ $? -eq 0 ]; then
+        echo "FAILURE: Test didn't pass..." >> $visible
+        java_failure_handler
+    fi
+    echo "SUCCESS: Java Unit Test PASSED..." >> $visible
+else 
+    echo "Running Python Unit Tests...." >> $visible
+    echo " " >> $visible
+    if [ ! -f part1_crypto.py ]; then 
+        echo "WILL FAIL: One of your submitted Python script must be named \"part1_crypto.py\". Otherwise unit tests won't be able to run..." >> $visible
+        end
+    fi 
+    python_copy
+    python ./test.py >> $visible 2>&1
+    if [ $? -ne 0 ]; then
+        echo "FAILURE: Your submitted Python Script(s) did not pass all unit tests. Please revise your submission...." >> $visible
+        python_clean
+        end
+    fi
+    echo "SUCCESS: Python Unit Testing PASSED...." >> $visible
+fi
+
+# Run with Client Bundle
+if [ "$JAVA_TOGGLE" = true ]; then
+    echo "Running Java Client Bundle with Submitted Java Class(es)...." >> $visible
+    echo " " >> $visible
+    make -f ./Makefile run ID=$name >> $visible 2>&1
+    if [ $? -ne 0 ]; then
+        echo "FAILURE: Errors in execution were detected..." >> $visible
+        java_failure_handler
+    fi
+    java_clean
+    echo "SUCCESS: Java Client Bundle executed flawlessly..." >> $visible
+else
+    echo "Running Python Client Bundle with Submitted Python Script(s)...." >> $visible
+    python ./client.py $name >> $visible 2>&1
+    if [ $? -ne 0 ]; then
+        echo "FAILURE: Your submitted Python Script(s) did not run properly with the Python Client Bundle...." >> $visible
+        echo " " >> $visible
+        python_clean
+        end
+    fi 
+    python_clean
+    echo "SUCCESS: Python Bundle Client runs properly with Reference Server...." >> $visible
+fi
+echo "================ END RUN SCRIPT ================" >> $visible
+echo "SUCCESS: Diffie Hellman Key Exchange with Reference Server completed." >> $visible
+echo "Congratulations, your submission was successful. :-) :-)" >> $visible
+exit 0;
